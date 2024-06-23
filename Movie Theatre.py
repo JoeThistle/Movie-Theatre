@@ -1,7 +1,7 @@
 #Title: Movie Theatre
 #Author: Joe Thistlethwaite
 #Purpose: To allow for users to book tickets for a movie
-#Version: 2
+#Version: 2.4
 from tkinter import *
 from tkinter import ttk
 import random
@@ -27,10 +27,14 @@ class Movie:
 
     def create_movie_times(self):
         '''Creates the times for ticket selection based on movie choice'''
-        btn_clear()
+        #btn_clear()
         #Loops and ensures that it will word with any number of movie slots (assuming there are enough times)
-        for num, time in enumerate(self.times):
-            Button(self.master, text=time, command=self.ticket_booking).grid(padx=10, pady=10, column=2, row=(num+2), sticky="WE")
+        #for num, time in enumerate(self.times):
+            #Button(self.master, text=time, command=self.ticket_booking).grid(padx=10, pady=5, column=2, row=(num+2))
+        time_selected = StringVar
+        times_drop_box = ttk.Combobox(self.master,textvariable=time_selected)
+        times_drop_box['values'] = self.times
+        times_drop_box.grid(padx=10, pady=5, row=2, column=2, sticky="WE")
     
 
     def ticket_booking(self):
@@ -39,16 +43,15 @@ class Movie:
 
 def main_menu(movie_list):
     '''This function creates the dropdown menu based off of what movies there are'''
-    global drop_box
     global movie_selected
     global date_lbl
     
     #Creates the dropbox along with selecting the times if someone selects a different movie within the drop box
     movie_selected = StringVar()
-    drop_box = ttk.Combobox(window, textvariable=movie_selected, state="readonly")
-    drop_box['values'] = movie_list
-    drop_box.grid(padx=10, pady=10, row=2, column=0, sticky="WE")
-    drop_box.bind("<<ComboboxSelected>>", choose_times)
+    movie_drop_box = ttk.Combobox(window, textvariable=movie_selected, state="readonly")
+    movie_drop_box['values'] = movie_list
+    movie_drop_box.grid(padx=10, pady=5, row=2, column=0, sticky="WE")
+    movie_drop_box.bind("<<ComboboxSelected>>", choose_times)
     
     #Makes all the stationary labels
     movie_lbl = Label(window, text="Movie:")
