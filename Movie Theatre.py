@@ -1,7 +1,7 @@
 #Title: Movie Theatre
 #Author: Joe Thistlethwaite
 #Purpose: To allow for users to book tickets for a movie
-#Version: 2.4
+#Version: 2.6
 from tkinter import *
 from tkinter import ttk
 import random
@@ -27,14 +27,10 @@ class Movie:
 
     def create_movie_times(self):
         '''Creates the times for ticket selection based on movie choice'''
-        #btn_clear()
+        btn_clear()
         #Loops and ensures that it will word with any number of movie slots (assuming there are enough times)
-        #for num, time in enumerate(self.times):
-            #Button(self.master, text=time, command=self.ticket_booking).grid(padx=10, pady=5, column=2, row=(num+2))
-        time_selected = StringVar
-        times_drop_box = ttk.Combobox(self.master,textvariable=time_selected)
-        times_drop_box['values'] = self.times
-        times_drop_box.grid(padx=10, pady=5, row=2, column=2, sticky="WE")
+        for num, time in enumerate(self.times):
+            Button(self.master, text=time, command=self.ticket_booking).grid(padx=10, pady=5, column=2, row=(num+2))
     
 
     def ticket_booking(self):
@@ -60,20 +56,24 @@ def main_menu(movie_list):
     time_lbl.grid(row=1, column=2, sticky="WE")
 
     #Makes the labels, buttons and frame for the date
+    global date_frame
     date_frame = Frame(window)
     date_frame.grid(row=0, column=0, columnspan=3)
     date_lbl = Label(date_frame, text=f"Date: {new_date.strftime('%d-%m-%y')}")
     date_lbl.grid(row=0, column=1, sticky="WE")
     date_forward = Button(date_frame, text=">", command=future_day)
     date_forward.grid(row=0, column=2, sticky="WE")
-    date_backward = Button(date_frame, text="<", command=past_day)
+    date_backward = Button(date_frame, text="<", command=past_day, state="disabled")
     date_backward.grid(row=0, column=0, sticky="WE")
+    
 
 
 def future_day():
     '''This function creates a new day with different timeslots'''
     global new_date
     global date_lbl
+    date_backward = Button(date_frame, text="<", command=past_day, state="active")
+    date_backward.grid(row=0, column=0, sticky="WE")
     #Sets the date label to the current date plus one day
     new_date = new_date + timedelta(days=1)
     date_lbl.config(text=f"Date: {new_date.strftime('%d-%m-%y')}")
@@ -82,8 +82,9 @@ def future_day():
 def past_day():
     '''This function goes back to a previous day'''
     global new_date
-    global date_lbl
-    
+    if (new_date - timedelta(days=2)) == date.today():
+        date_backward = Button(date_frame, text="<", command=past_day, state="disabled")
+        date_backward.grid(row=0, column=0, sticky="WE")
     new_date = new_date - timedelta(days=1)
     date_lbl.config(text=f"Date: {new_date.strftime('%d-%m-%y')}")
     choose_times()
@@ -116,6 +117,6 @@ def btn_clear():
 # Main Program
 window = Tk()
 window.title("Movie Theatre")
-window.geometry("300x350")
+window.geometry("250x275")
 main_menu(list(movies.keys()))
 window.mainloop()
