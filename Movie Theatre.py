@@ -1,16 +1,22 @@
 #Title: Movie Theatre
 #Author: Joe Thistlethwaite
 #Purpose: To allow for users to book tickets for a movie
-#Version: 2.6
+#Version: 2.8
 from tkinter import *
 from tkinter import ttk
 import random
 import time
+import json
 from datetime import date, timedelta
 
-MAX_SEATS = 150
-movies = {"Kingsman": 6, "Oppenheimer": 3, "The Italian Job": 4, "Doctor Who": 3, "Five Nights At Freddy's": 3, "Despicable Me 4": 5}
-times = ["10:00am", "10:10am", "12:30pm", "1:40pm", "2:00pm", "2:30pm", "4:00pm", "4:40pm", "6:10pm", "8:00pm"]
+#Opens the movie data file and sets all the variables
+with open("Movie Data.json") as file:
+    data = json.loads(file.read())
+MAX_SEATS = data["max_seats"]
+movies = data["movies&showings"]
+times = data["timeslots"]
+
+#Gets the date the program starts at using the systems time
 start_date = date.today() + timedelta(days=1)
 new_date = start_date
 stored_times = {}
