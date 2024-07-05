@@ -37,6 +37,7 @@ def show_showings(*args):
     time_btn.grid_forget()
     save_btn.grid(row=1,column=1)
 
+
 def save_showings():
     current_movie = movie_selected.get()
     global show_error_lbl
@@ -62,13 +63,31 @@ def save_showings():
         show_error_lbl = Label(window,text="Please Enter A Number")
         show_error_lbl.grid(row=3,column=1)
 
+
+def back_main():
+    '''Goes back to the main menu'''
+    for widget in window.winfo_children():
+        widget.destroy()
+    main_menu()
+
+
+def time_changer():
+    ''''''
+
+
+def main_menu():
+    global time_btn
+    main_lbl = Label(window,text="What do you wish to change?")
+    showings_btn = Button(window,text="Showings",command=showings)
+    time_btn = Button(window,text="Time Slots",command=())
+    back_btn = Button(window,text="Back",command=back_main)
+    main_lbl.grid(row=0,column=0,columnspan=2)
+    time_btn.grid(row=1,column=1)
+    showings_btn.grid(row=1,column=0)
+    back_btn.grid(row=4,column=0,columnspan=2)
+    
 window = Tk()
-main_lbl = Label(window,text="What do you wish to change?")
-showings_btn = Button(window,text="Showings",command=showings)
-time_btn = Button(window,text="Time Slots",command=())
-main_lbl.grid(row=0,column=0,columnspan=2)
-time_btn.grid(row=1,column=1)
-showings_btn.grid(row=1,column=0)
 window.title("Movie Data")
 window.geometry("300x325")
+main_menu()
 window.mainloop()
