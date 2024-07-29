@@ -1,11 +1,13 @@
 #Title: Change Movie Data
 #Author: Joe Thistlethwaite
 #Purpose: To allow for staff to change movie data
-#Version: 1.8
+#Version: 2.0
 
 from tkinter import *
 from tkinter import ttk
+from datetime import datetime
 import json
+import time
 
 def grab_data():
     '''Takes the data from the json file'''
@@ -106,7 +108,52 @@ def time_changer():
 
 def add_time():
     ''''''
+    grab_data()
+    global time_to_add
+    global time_add_ent
     grid_clear([".times_main_lbl",".back_btn"])
+    time_to_add = StringVar()
+    time_add_lbl = Label(window,text="Enter Time To Add:")
+    add_tip_lbl = Label(window,text="Please enter in 24 hour\nformat, e.g. 5:00pm = 1700")
+    time_add_ent = Entry(window,text=time_to_add)
+    save_add_btn = Button(window,text="Add",command=save_add)
+    time_add_lbl.grid(row=1,column=0)
+    add_tip_lbl.grid(row=2,column=0,columnspan=2)
+    time_add_ent.grid(row=1,column=1)
+    save_add_btn.grid(row=1,column=2)
+
+
+def save_add():
+    ''''''
+    grab_data()
+    global data
+    time_choice = time_to_add.get()
+    try:
+        if len(time_choice) == 4 and int(time_choice[-2:]) < 60 and int(time_choice) >= 0 and int(time_choice) < 2400:
+            time_choice = datetime.strptime(time_choice, "%H%M")
+            time_choice = str(time_choice.strftime("%I:%M%p"))
+            data["timeslots"].append(time_choice)
+            format = '%I:%M%p'
+            time_hours = [time.strptime(t, format) for t in data["timeslots"]]
+            sorted_times = [time.strftime(format, h) for h in sorted(time_hours)]
+            data["timeslots"] = sorted_times
+            with open("Movie Data.json","w") as outfile:
+                    data = json.dumps(data,indent=2)
+                    outfile.write(data)
+            time_add_ent.delete(0, 'end')
+            for widget in window.winfo_children():
+                if str(widget) == ".success" or str(widget) == ".fail":
+                    widget.destroy()
+            success_lbl = Label(window,text="Success",fg="green",name="success")
+            success_lbl.grid(row=2,column=2)
+        else:
+            raise ValueError
+    except:
+        for widget in window.winfo_children():
+            if str(widget) == ".success" or str(widget) == ".fail":
+                widget.destroy()
+        fail_lbl = Label(window,text="Error",fg="red",name="fail")
+        fail_lbl.grid(row=2,column=2)
 
 
 def remove_time():
