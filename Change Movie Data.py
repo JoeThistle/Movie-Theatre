@@ -1,7 +1,7 @@
 #Title: Change Movie Data
 #Author: Joe Thistlethwaite
 #Purpose: To allow for staff to change movie data
-#Version: 2.0
+#Version: 2.5
 
 from tkinter import *
 from tkinter import ttk
@@ -116,15 +116,15 @@ def add_time():
     time_add_lbl = Label(window,text="Enter Time To Add:")
     add_tip_lbl = Label(window,text="Please enter in 24 hour\nformat, e.g. 5:00pm = 1700")
     time_add_ent = Entry(window,text=time_to_add)
-    save_add_btn = Button(window,text="Add",command=save_add)
+    save_add_btn = Button(window,text="Add",command=save_time_add)
     time_add_lbl.grid(row=1,column=0)
     add_tip_lbl.grid(row=2,column=0,columnspan=2)
     time_add_ent.grid(row=1,column=1)
     save_add_btn.grid(row=1,column=2)
 
 
-def save_add():
-    ''''''
+def save_time_add():
+    '''Saves the new movie to the json file'''
     grab_data()
     global data
     time_choice = time_to_add.get()
@@ -157,7 +157,7 @@ def save_add():
 
 
 def remove_time():
-    ''''''
+    '''Sets up the GUI for removing movies'''
     global time_removing
     grab_data()
     times = data['timeslots']
@@ -171,6 +171,7 @@ def remove_time():
 
 
 def del_time():
+    '''Deletes the time from the json file'''
     try:
         new_data = data["timeslots"].remove(time_removing.get())
         with open("Movie Data.json","w") as outfile:
@@ -181,6 +182,68 @@ def del_time():
         pass
 
 
+def movie_main():
+    '''Main menu for removing movies'''
+    grid_clear([".back_btn"])
+    movies_main_lbl = Label(window,text="Movies",font="bold",name="movies_main_lbl")
+    movies_add_btn = Button(window,text="Add Movie",width=12,command=add_movie)
+    movies_remove_btn = Button(window,text="Remove Movie",width=12,command=remove_movie)
+    movies_main_lbl.grid(row=0,column=0,columnspan=3)
+    movies_add_btn.grid(row=1,column=0,sticky="WE")
+    movies_remove_btn.grid(row=1,column=1,sticky="WE")
+
+
+def remove_movie():
+    '''Sets up the GUI for removing movies'''
+    global movie_removing
+    grab_data()
+    movies = list(data['movies&showings'].keys())
+    movie_removing = StringVar()
+    grid_clear([".movies_main_lbl",".back_btn"])
+    movies_box = ttk.Combobox(window, textvariable=movie_removing, state="readonly")
+    movies_box['values'] = movies
+    movies_box.grid(row=1,column=0)
+    movie_remove_btn = Button(window,text="Remove",command=del_movie)
+    movie_remove_btn.grid(row=1,column=1)
+
+
+def del_movie():
+    '''Deletes the movie from the json file'''
+    try:
+        new_data = data['movies&showings'].pop(movie_removing.get())
+        with open("Movie Data.json","w") as outfile:
+                new_data = json.dumps(data,indent=2)
+                outfile.write(new_data)
+        remove_movie()
+    except:
+        pass
+
+
+def add_movie():
+    '''Asks the user what movie they wish to add'''
+    grab_data()
+    global movie_adding
+    global movie_add_ent
+    grid_clear([".movies_main_lbl",".back_btn"])
+    movie_adding = StringVar()
+    movie_add_lbl = Label(window,text="Enter Movie To Add:")
+    movie_add_ent = Entry(window,text=movie_adding)
+    save_add_btn = Button(window,text="Add",command=save_movie_add)
+    movie_add_lbl.grid(row=1,column=0)
+    movie_add_ent.grid(row=1,column=1)
+    save_add_btn.grid(row=1,column=2)
+
+
+def save_movie_add():
+    '''Saves the new movie to the json file'''
+    try:
+        new_data = data['movies&showings'][movie_adding.get()] = 0
+        with open("Movie Data.json","w") as outfile:
+                new_data = json.dumps(data,indent=2)
+                outfile.write(new_data)
+        add_movie()
+    except:
+        pass
 
 
 def main_menu():
@@ -188,11 +251,13 @@ def main_menu():
     main_lbl = Label(window,text="What do you wish to change?")
     showings_btn = Button(window,text="Showings",width=8,command=showings)
     time_btn = Button(window,text="Time Slots",width=8,command=time_changer)
+    movie_btn = Button(window,text="Movies",width=8,command=movie_main)
     back_btn = Button(window,text="Back",command=lambda:grid_clear([]), name="back_btn")
-    back_btn.grid(row=4,column=0,columnspan=2,sticky="WE")
-    main_lbl.grid(row=0,column=0,columnspan=2)
-    time_btn.grid(row=1,column=1)
+    back_btn.grid(row=4,column=0,columnspan=3,sticky="WE")
+    main_lbl.grid(row=0,column=0,columnspan=3)
     showings_btn.grid(row=1,column=0)
+    time_btn.grid(row=1,column=1)
+    movie_btn.grid(row=1,column=2)
     
 
 window = Tk()

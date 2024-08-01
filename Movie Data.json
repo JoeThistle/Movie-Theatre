@@ -1,6 +1,6 @@
 {
   "movies&showings": {
-    "Kingsman": 6,
+    "Kingsman": 5,
     "Oppenheimer": 3,
     "The Italian Job": 4,
     "Doctor Who": 3,
@@ -8,16 +8,15 @@
     "Despicable Me 4": 5
   },
   "timeslots": [
-    "10:00am",
-    "10:10am",
-    "12:30pm",
-    "1:40pm",
-    "2:00pm",
-    "2:30pm",
-    "4:00pm",
-    "4:40pm",
-    "6:10pm",
-    "8:00pm"
+    "10:10AM",
+    "12:30PM",
+    "01:40PM",
+    "02:00PM",
+    "02:30PM",
+    "04:00PM",
+    "04:40PM",
+    "06:10PM",
+    "08:00PM"
   ],
   "max_seats": 150,
   "MAX_SHOWINGS": 6
