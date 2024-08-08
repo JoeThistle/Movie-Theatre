@@ -7,6 +7,11 @@
     "Five Nights At Freddy's": 3,
     "Despicable Me 4": 5
   },
+  "pricing": {
+    "Child":5,
+    "Adult":15,
+    "Student/Senior":10
+  },
   "timeslots": [
     "10:10AM",
     "12:30PM",
