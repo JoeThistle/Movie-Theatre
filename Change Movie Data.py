@@ -75,14 +75,14 @@ def save_showings():
             except:
                 pass
             show_error_lbl = Label(window,text="Number must be\nbetween 0 and 6")
-            show_error_lbl.grid(row=3,column=1)
+            show_error_lbl.grid(row=4,column=1)
     except:
         try:
                 show_error_lbl.grid_remove()
         except:
             pass
         show_error_lbl = Label(window,text="Please Enter A Number")
-        show_error_lbl.grid(row=3,column=1)
+        show_error_lbl.grid(row=4,column=1)
 
 
 def grid_clear(exceptions):
@@ -253,7 +253,7 @@ def main_menu():
     time_btn = Button(window,text="Time Slots",width=8,command=time_changer)
     movie_btn = Button(window,text="Movies",width=8,command=movie_main)
     back_btn = Button(window,text="Back",command=lambda:grid_clear([]), name="back_btn")
-    back_btn.grid(row=4,column=0,columnspan=3,sticky="WE")
+    back_btn.grid(row=5,column=0,columnspan=3,sticky="WE")
     main_lbl.grid(row=0,column=0,columnspan=3)
     showings_btn.grid(row=1,column=0)
     time_btn.grid(row=1,column=1)
