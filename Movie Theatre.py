@@ -1,7 +1,7 @@
-# Title: Movie Theatre
-# Author: Joe Thistlethwaite
-# Purpose: To allow for users to book tickets for a movie
-# Version: 4.0
+#Title: Movie Theatre
+#Author: Joe Thistlethwaite
+#Purpose: To allow for users to book tickets for a movie
+#Version: 4.5
 
 from tkinter import *
 from tkinter import ttk
@@ -9,6 +9,8 @@ import random
 import time
 import json
 from datetime import date, timedelta
+
+#PLEASE DO "pip install pillow" IN THE TERMINAL FOR THE FOLLOWING LINE TO WORK
 from PIL import Image, ImageTk
 
 #Opens the movie data file and sets all the variables
@@ -44,15 +46,23 @@ class MovieBookings:
 
     def create_movie_times(self):
         '''Creates the times for ticket selection based on movie choice'''
-        btn_clear()
         #Create the frame to hold the time buttons and place it to the right of the movies frame
         times_frame = Frame(self.master, bg="#077deb")
-        times_frame.grid(row=3, column=2, sticky="N")
+        times_frame.grid(row=3, column=2, sticky="NWE")
 
-        #Loops and ensures that it will work with any number of movie slots (assuming there are enough times)
+        #Configure the grid columns in times_frame to expand equally
+        times_frame.grid_columnconfigure(0, weight=1)
+        for i in range(len(self.times)):
+            times_frame.grid_columnconfigure(i, weight=1)
+
+        #Create the movie label and span it across all columns
+        current_movie_lbl = Label(times_frame, text=movie_selected.get(), bg="light blue", fg="#077deb", height=4, font=("arial",50,"bold"))
+        current_movie_lbl.grid(padx=100, pady=30, row=0, column=0, columnspan=len(self.times), sticky="WE")
+
+        #Create buttons for each time slot
         for num, time in enumerate(self.times):
-            ttk.Button(times_frame, text=time, command=lambda t=time: self.ticket_booking(t)).grid(padx=10, pady=5, row=num, column=0)
-        
+            Button(times_frame, text=time, command=lambda t=time: self.ticket_booking(t), fg="light blue", bg="#077deb", width=10, cursor="hand2", font=("arial",18,"bold")).grid(padx=10, pady=5, row=1, column=num, sticky="WE")
+            
 
     def ticket_booking(self, time):
         '''This function does all of the tasks related to booking tickets'''
@@ -115,6 +125,7 @@ class MovieBookings:
 
         #Makes the new window on top
         root = Toplevel(window)
+        root.grab_set()
         root.title("Ticket Booking")
         root.bind('<Return>', lambda event:book())
         #Makes all the labels and grid entries
@@ -174,6 +185,10 @@ def main_menu(movie_list):
     #Create a scrollbar linked to the canvas
     scrollbar = Scrollbar(window, orient="vertical", command=canvas.yview)
     scrollbar.grid(row=3, column=1, sticky="NS")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    #Bind mouse wheel to canvas scroll
+    canvas.bind_all("<MouseWheel>", lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
 
     #Create a frame inside the canvas which will hold the movie buttons and images
     movies_frame = Frame(canvas, bg="#077deb")
@@ -185,14 +200,10 @@ def main_menu(movie_list):
 
     movies_frame.bind("<Configure>", on_frame_config)
 
-    #Add a scrollbar to the canvas
-    canvas.configure(yscrollcommand=scrollbar.set)
-
     #Create buttons for each movie and load images
     for num, movie in enumerate(movie_list):
-        btn = Button(movies_frame, text=movie, command=lambda m=movie: choose_times(m))
+        btn = Button(movies_frame, text=movie, cursor="hand2", command=lambda m=movie: choose_times(m))
         btn.grid(row=num, column=0, padx=10, pady=5, sticky="W")
-        
         try:
             #Get and resize the image to fit
             image = Image.open(f"{movie}.png")
@@ -208,6 +219,12 @@ def main_menu(movie_list):
     window.grid_rowconfigure(3, weight=1)
     window.grid_columnconfigure(0, weight=0)
 
+    #Creates the program exit button and admin button and puts them into a frame
+    admin_frm = Frame(window)
+    exit_btn = Button(admin_frm,text="Close Program",fg="light blue", bg="#077deb", cursor="hand2", font=("arial",18,"bold"),command=exit).grid(padx=10, pady=5, row=0, column=1, sticky="WE")
+    admin_btn = Button(admin_frm,text="Edit Movies",fg="light blue", bg="#077deb", cursor="hand2", font=("arial",18,"bold"),command=()).grid(padx=10, pady=5, row=0, column=0, sticky="WE")
+    admin_frm.grid(row=4,column=2)
+
 
 def future_day():
     '''This function creates a new day with different timeslots'''
@@ -220,13 +237,14 @@ def future_day():
     date_lbl.config(text=f"Date: {new_date.strftime('%d-%m-%y')}")
     choose_times(movie_selected.get())
 
+
 def past_day():
     '''This function goes back to a previous day'''
     global new_date
     #Checks to make sure the day isn't today
     if (new_date - timedelta(days=2)) == date.today():
         date_backward = Button(date_frame, text="<", command=past_day, state="disabled")
-        date_backward.grid(row=0, column=0, sticky="WE")
+        date_backward.grid(row=0, column=0)
     new_date = new_date - timedelta(days=1)
     #Configures the date label to show the new date
     date_lbl.config(text=f"Date: {new_date.strftime('%d-%m-%y')}")
@@ -250,11 +268,6 @@ def choose_times(movie):
         chosen_times = stored_times[(movie, date_str)]
     MovieBookings(window, movie, chosen_times)
 
-def btn_clear():
-    '''Used to clear all widgets'''
-    for widget in window.grid_slaves():
-        if int(widget.grid_info()["column"]) == 2 and int(widget.grid_info()["row"]) > 1:
-            widget.destroy()
 
 #Main Program
 window = Tk()
