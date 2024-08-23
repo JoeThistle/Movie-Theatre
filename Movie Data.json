@@ -20,7 +20,6 @@
     "02:30PM",
     "04:00PM",
     "04:40PM",
-    "05:17PM",
     "06:10PM",
     "08:00PM"
   ],
@@ -28,6 +27,6 @@
     "username": "username",
     "password": "password"
   },
-  "max_seats": 130,
+  "max_seats": 150,
   "MAX_SHOWINGS": 6
 }
