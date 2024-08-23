@@ -1,25 +1,35 @@
 #Title: Movie Theatre
 #Author: Joe Thistlethwaite
 #Purpose: To allow for users to book tickets for a movie
-#Version: 4.5
+#Version: 5.0
 
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import random
 import time
 import json
+import subprocess
 from datetime import date, timedelta
 
 #PLEASE DO "pip install pillow" IN THE TERMINAL FOR THE FOLLOWING LINE TO WORK
 from PIL import Image, ImageTk
 
 #Opens the movie data file and sets all the variables
-with open("Movie Data.json") as file:
-    data = json.loads(file.read())
-MAX_SEATS = data["max_seats"]
-MOVIES = data["movies&showings"]
-TIMES = data["timeslots"]
-PRICING = data["pricing"]
+def grab_data():
+    '''This function is used to grab data from my json file'''
+    global MAX_SEATS
+    global MOVIES
+    global TIMES
+    global PRICING
+    global CREDENTIALS
+    with open("Movie Data.json") as file:
+        data = json.loads(file.read())
+    MAX_SEATS = data["max_seats"]
+    MOVIES = data["movies&showings"]
+    TIMES = data["timeslots"]
+    PRICING = data["pricing"]
+    CREDENTIALS = data["credentials"]
+grab_data()
 
 #Gets the date the program starts at using the system's time
 start_date = date.today() + timedelta(days=1)
@@ -36,6 +46,7 @@ class MovieBookings:
         #Creates buttons for the grid
         self.create_movie_times()
 
+
     def validate_entry(self, value):
         '''Ensures that the entry value is a non-negative integer'''
         if value == "":
@@ -44,7 +55,9 @@ class MovieBookings:
             return True
         return False
 
+
     def create_movie_times(self):
+        grab_data()
         '''Creates the times for ticket selection based on movie choice'''
         #Create the frame to hold the time buttons and place it to the right of the movies frame
         times_frame = Frame(self.master, bg="#077deb")
@@ -65,6 +78,7 @@ class MovieBookings:
             
 
     def ticket_booking(self, time):
+        grab_data()
         '''This function does all of the tasks related to booking tickets'''
         tickets = {i: StringVar(value='0') for i in PRICING}
 
@@ -80,7 +94,7 @@ class MovieBookings:
                         total_tickets += int(tickets[i].get())
                 #Checks to make sure there aren't too many tickets
                 if total_tickets > MAX_SEATS:
-                    total_lbl.config(text="Too many tickets")
+                    total_lbl.config(text="Too Many")
                 else:
                     #Prints the total 
                     for i in PRICING:
@@ -93,6 +107,7 @@ class MovieBookings:
             total_lbl.grid(row=len(PRICING), column=1, sticky="WE", ipady=8, ipadx=15)
 
         def book():
+            grab_data()
             '''Books the users ticket'''
             total_tickets = 0
             #Gets the tickets that they are booking
@@ -102,7 +117,7 @@ class MovieBookings:
             #If they book more than the max amount of seats
             if total_tickets > MAX_SEATS:
                 success_lbl.grid_remove()
-                error_lbl.config(text="Cannot book more than available seats.", bg="red")
+                error_lbl.config(text="Cannot book more than available seats.", bg="red", font=("arial",12,"bold"))
                 error_lbl.grid(row=len(PRICING) + 2, column=0, columnspan=2, sticky="WE", ipady=8, ipadx=15)
                 return
             date_str = new_date.strftime('%d-%m-%y')
@@ -114,38 +129,71 @@ class MovieBookings:
             #Checks if there are too many seats being booked
             if booked_seats[key] + total_tickets > MAX_SEATS:
                 success_lbl.grid_remove()
-                error_lbl.config(text="Not enough seats available.", bg="orange")
+                error_lbl.config(text="Not enough seats available.", bg="orange", font=("arial",12,"bold"))
                 error_lbl.grid(row=len(PRICING) + 2, column=0, columnspan=2, sticky="WE", ipady=8, ipadx=15)
                 return
             #Adds the rest of the seats to the booked seats using the key
             booked_seats[key] += total_tickets
             error_lbl.grid_remove()
-            success_lbl.config(text="Booking successful!", bg="green", fg="white")
+            success_lbl.config(text="Booking successful!", bg="green", fg="white", font=("arial",12,"bold"))
             success_lbl.grid(row=len(PRICING) + 2, column=0, columnspan=2, sticky="WE", ipady=8, ipadx=15)
 
         #Makes the new window on top
         root = Toplevel(window)
         root.grab_set()
+        root.config(bg="#077deb")
         root.title("Ticket Booking")
         root.bind('<Return>', lambda event:book())
         #Makes all the labels and grid entries
         for i, (type, price) in enumerate(PRICING.items()):
-            Label(root, text=f"{type}: ${price}", bg="#077deb").grid(row=i, column=0, sticky="WE", ipady=8, ipadx=15)
+            Label(root, text=f"{type}: ${price}", fg="light blue", bg="#077deb", font=("arial",15,"bold")).grid(row=i, column=0, sticky="WE", ipady=8, ipadx=15)
             ticket_ent = Entry(root, textvariable=tickets[type])
             ticket_ent.grid(row=i, column=1, sticky="WE", ipady=8, ipadx=15)
             ticket_ent.config(validate="key", validatecommand=(root.register(self.validate_entry), "%P"))
             tickets[type].trace_add('write', calculate_total)
 
-        #Makes the total label and calculates the amount that should be shown
-        total_lbl = Label(root, text="$0.00", bg="#077deb")
-        total_lbl.grid(row=len(PRICING), column=1, sticky="WE", ipady=8, ipadx=15)
-        calculate_total()
-        book_btn = ttk.Button(root, text="Book Tickets", command=book)
-        book_btn.grid(row=len(PRICING), column=0, sticky="WE", ipady=8, ipadx=15)
+        #Makes the rest of the labels and buttons
+        total_lbl = Label(root, text="$0.00", bg="#077deb", fg="light blue", font=("arial",15,"bold"))
+        book_btn = Button(root, text="Book Tickets", fg="light blue", bg="#077deb", cursor="hand2", font=("arial",15,"bold"), command=book)
         error_lbl = Label(root, text="")
+        success_lbl = Label(root, text="", bg="#077deb")
+
+        #Calculates the total and grids them all
+        calculate_total()
+        total_lbl.grid(row=len(PRICING), column=1, sticky="WE", ipady=8, ipadx=15)
+        book_btn.grid(row=len(PRICING), column=0, sticky="WE", ipady=8, ipadx=15)
         error_lbl.grid(row=len(PRICING) + 2, column=0, columnspan=2, sticky="WE", ipady=8, ipadx=15)
-        success_lbl = Label(root, text="")
-        success_lbl.grid(row=len(PRICING) + 3, column=0, columnspan=2, sticky="WE", ipady=8, ipadx=15)
+        success_lbl.grid(row=len(PRICING) + 2, column=0, columnspan=2, sticky="WE", ipady=8, ipadx=15)
+
+
+def authenticate():
+    '''Function to authenticate user'''
+    def verify_credentials():
+        '''Checks inputs against credentials'''
+        if username_entry.get() == CREDENTIALS["username"] and password_entry.get() == CREDENTIALS["password"]:
+            login_window.destroy()
+            #Run the "Change Movie Data.py" script
+            subprocess.run(["python", "Change Movie Data.py"])
+        else:
+            messagebox.showerror("Login Failed", "Incorrect username or password.")
+
+    #Create login window
+    login_window = Toplevel(window)
+    login_window.grab_set()
+    login_window.title("Admin Login")
+    login_window.geometry("300x200")
+    
+    #Creates username entry/label and packs it
+    Label(login_window, text="Username:").pack(pady=10)
+    username_entry = Entry(login_window)
+    username_entry.pack(pady=5)
+    
+    #Creates password entry/label, makes inputs appear as "*" and packs it
+    Label(login_window, text="Password:").pack(pady=10)
+    password_entry = Entry(login_window, show="*")
+    password_entry.pack(pady=5)
+    
+    Button(login_window, text="Login", command=verify_credentials).pack(pady=20)
 
 
 def main_menu(movie_list):
@@ -202,7 +250,7 @@ def main_menu(movie_list):
 
     #Create buttons for each movie and load images
     for num, movie in enumerate(movie_list):
-        btn = Button(movies_frame, text=movie, cursor="hand2", command=lambda m=movie: choose_times(m))
+        btn = Button(movies_frame, text=movie, fg="light blue", bg="#077deb", cursor="hand2", font=("arial",12,"bold"), command=lambda m=movie: choose_times(m))
         btn.grid(row=num, column=0, padx=10, pady=5, sticky="W")
         try:
             #Get and resize the image to fit
@@ -214,16 +262,24 @@ def main_menu(movie_list):
             image_label.grid(row=num, column=1, padx=10, pady=5, sticky="W")
         except Exception as e:
             print(f"Error loading image for {movie}: {e}")
+            image = Image.open("Placeholder.png")
+            image = image.resize((150, 200))
+            movie_image = ImageTk.PhotoImage(image)
+            image_label = Label(movies_frame, image=movie_image, bg="#077deb")
+            image_label.image = movie_image
+            image_label.grid(row=num, column=1, padx=10, pady=5, sticky="W")
 
-    #Ensures that the movies frame expands to fill the canvas
+    # Ensures that the movies frame expands to fill the canvas
     window.grid_rowconfigure(3, weight=1)
     window.grid_columnconfigure(0, weight=0)
 
-    #Creates the program exit button and admin button and puts them into a frame
+    # Creates the program exit button and admin button and puts them into a frame
     admin_frm = Frame(window)
-    exit_btn = Button(admin_frm,text="Close Program",fg="light blue", bg="#077deb", cursor="hand2", font=("arial",18,"bold"),command=exit).grid(padx=10, pady=5, row=0, column=1, sticky="WE")
-    admin_btn = Button(admin_frm,text="Edit Movies",fg="light blue", bg="#077deb", cursor="hand2", font=("arial",18,"bold"),command=()).grid(padx=10, pady=5, row=0, column=0, sticky="WE")
-    admin_frm.grid(row=4,column=2)
+    exit_btn = Button(admin_frm, text="Close Program", fg="light blue", bg="#077deb", cursor="hand2", font=("arial", 18, "bold"), command=exit)
+    exit_btn.grid(padx=10, pady=5, row=0, column=1, sticky="WE")
+    admin_btn = Button(admin_frm, text="Edit Movies", fg="light blue", bg="#077deb", cursor="hand2", font=("arial", 18, "bold"), command=authenticate)
+    admin_btn.grid(padx=10, pady=5, row=0, column=0, sticky="WE")
+    admin_frm.grid(row=4, column=2)
 
 
 def future_day():

@@ -95,6 +95,41 @@ def grid_clear(exceptions):
         main_menu()
 
 
+def change_max_seats():
+    '''This Function Changes The Max Seats'''
+    global new_max
+    global max_ent
+    grab_data()
+    grid_clear([".back_btn"])
+    new_max = StringVar()
+    max_main_lbl = Label(window,text="Max Seats In Theatre",font="bold")
+    save_max_btn = Button(window,text="Save",command=save_max)
+    max_lbl = Label(window,text="What is the new maximum: ")
+    max_ent = Entry(window,text=new_max)
+    max_main_lbl.grid(row=0,column=0,columnspan=2)
+    save_max_btn.grid(row=2,column=0,sticky="WE")
+    max_lbl.grid(row=1,column=0)
+    max_ent.grid(row=1,column=1)
+
+
+def save_max():
+    '''Saves the max seats'''
+    grab_data()
+    global data
+    saving = new_max.get()
+    try:
+        if int(saving) > 0:
+            data["max_seats"] = int(saving)
+            with open("Movie Data.json","w") as outfile:
+                data = json.dumps(data,indent=2)
+                outfile.write(data)
+            max_success = Label(window,text="Saved Successfully",fg="green")
+            max_success.grid(row=2,column=1,sticky="WE")
+    except:
+        max_fail = Label(window,text="Failed To Save",fg="red")
+        max_fail.grid(row=2,column=1,sticky="WE")
+
+
 def time_changer():
     '''Opens the time changing window'''
     grid_clear([".back_btn"])
@@ -107,7 +142,7 @@ def time_changer():
 
 
 def add_time():
-    ''''''
+    '''Allows the user to enter new tiems'''
     grab_data()
     global time_to_add
     global time_add_ent
@@ -252,16 +287,19 @@ def main_menu():
     showings_btn = Button(window,text="Showings",width=8,command=showings)
     time_btn = Button(window,text="Time Slots",width=8,command=time_changer)
     movie_btn = Button(window,text="Movies",width=8,command=movie_main)
+    seats_btn = Button(window,text="Max Seats",width=8,command=change_max_seats)
     back_btn = Button(window,text="Back",command=lambda:grid_clear([]), name="back_btn")
-    back_btn.grid(row=5,column=0,columnspan=3,sticky="WE")
-    main_lbl.grid(row=0,column=0,columnspan=3)
+    back_btn.grid(row=5,column=0,columnspan=4,sticky="WE")
+    main_lbl.grid(row=0,column=0,columnspan=4)
     showings_btn.grid(row=1,column=0)
     time_btn.grid(row=1,column=1)
     movie_btn.grid(row=1,column=2)
+    seats_btn.grid(row=1,column=3)
     
 
 window = Tk()
 window.title("Movie Data")
+window.grab_set()
 window.geometry("300x325")
 main_menu()
 window.mainloop()

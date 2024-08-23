@@ -1,7 +1,7 @@
 {
   "movies&showings": {
     "Kingsman": 5,
-    "Oppenheimer": 3,
+    "Oppenheimer": 4,
     "The Italian Job": 4,
     "Doctor Who": 3,
     "Five Nights At Freddy's": 3,
@@ -20,9 +20,14 @@
     "02:30PM",
     "04:00PM",
     "04:40PM",
+    "05:17PM",
     "06:10PM",
     "08:00PM"
   ],
-  "max_seats": 150,
+  "credentials": {
+    "username": "username",
+    "password": "password"
+  },
+  "max_seats": 130,
   "MAX_SHOWINGS": 6
 }
